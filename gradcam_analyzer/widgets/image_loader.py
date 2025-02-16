@@ -20,8 +20,8 @@ class ImageLoader(tk.Frame):
         file_path = filedialog.askopenfilename()
         if file_path:
             self.image_data = Image.open(file_path)
-            display_image = self.image_data.resize((800,600))
-            photo = ImageTk.PhotoImage(display_image)
+            self.display_image = self.image_data.resize((self.width, self.height))
+            photo = ImageTk.PhotoImage(self.display_image)
             self.image_label.config(image=photo)
             self.image_label.image = photo
 

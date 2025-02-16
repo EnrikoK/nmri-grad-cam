@@ -1,7 +1,7 @@
 import tkinter as tk
 from functools import partial
 from tkinter import ttk, PhotoImage
-from PIL import Image
+from PIL import Image, ImageTk
 from ..service import AnalysisService
 from gradcam_analyzer.widgets import ImageLoader
 
@@ -94,10 +94,23 @@ class ControlPanel(tk.Frame):
 
 
 
+    def create_masked_layer(self, mask, alpha=0.5):
+        base = self.image_loader.display_image.convert("RGBA")
+
+        red_mask = Image.merge("RGBA", (
+            mask,  # Red channel = grayscale mask
+            Image.new("L", mask.size, 0),  # Green channel = 0
+            Image.new("L", mask.size, 0), # Blue channel = 0
+            mask
+        ))
+        red_mask = red_mask.resize(base.size)
+        return Image.alpha_composite(base,red_mask)
+
     def show_layer(self, layer):
         if layer == "Original Image":
             self.image_loader.reset_image()
         else:
             image= self.analysis_result[layer][1]
+            image = ImageTk.PhotoImage(self.create_masked_layer(image))
             self.image_loader.update_image(image)
 

@@ -58,7 +58,7 @@ def make_gradcam_heatmap_keras(img_array, model, last_conv_layer_name, pred_inde
     # Resize the heatmap to match the original image dimensions if needed (optional)
     heatmap = heatmap.resize((800,600))
     # Convert the PIL Image to a Tkinter-compatible PhotoImage
-    heatmap_tk = ImageTk.PhotoImage(heatmap)
+    #heatmap_tk = ImageTk.PhotoImage(heatmap)
 
-    return heatmap_tk
+    return heatmap
 
