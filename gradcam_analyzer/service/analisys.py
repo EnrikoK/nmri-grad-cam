@@ -2,12 +2,14 @@ import os
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
-from ..CAM.grad_cam import  make_gradcam_heatmap_keras
+from ..CAM.guided import make_gradcam_heatmap_keras
+from ..CAM.py_imgsearch_cam import compute_heatmap
 
 class AnalysisService():
 
     cam_options = {
-        "Grad-CAM": make_gradcam_heatmap_keras
+        "Grad-CAM": make_gradcam_heatmap_keras,
+        "Guided Grad-CAM": compute_heatmap
     }
 
     def __init__(self, models_folder: str):
@@ -22,6 +24,9 @@ class AnalysisService():
             return list(models)
         else:
             return None
+
+    def get_cam_options(self):
+        return list(self.cam_options.keys())
 
     def preprocess_pil_image(self,pil_img):
         """
@@ -39,8 +44,9 @@ class AnalysisService():
 
     def load_model_from_location(self, model_name):
         return load_model(os.path.join(self.models_folder, model_name))
-    
-    def get_analysis(self, model_name, selected_cam, image, prediction_classes):
+
+
+    def get_analysis(self, model_name, selected_cam, image, prediction_classes, conv_layer):
         """
 
         :param model_name: Name of the selected model in the specified models folder. File name is used as model name
@@ -61,13 +67,15 @@ class AnalysisService():
         for index, class_name in enumerate(prediction_classes):
 
             score = predictions[0, index]
-
+            #for layer in ["conv2d","conv2d_1", "conv2d_2", "conv2d_3"]:
+            model = self.load_model_from_location(model_name)
             cam_image = AnalysisService.cam_options[selected_cam](
                 img_array=image,
                 model=model,
-                last_conv_layer_name="conv2d",#model.layers[0].name
+                last_conv_layer_name=conv_layer,#model.layers[0].name
                 pred_index=index
             )
+
 
             results[class_name] = (score, cam_image)
 

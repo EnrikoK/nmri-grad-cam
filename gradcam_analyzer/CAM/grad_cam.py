@@ -19,20 +19,12 @@ def make_gradcam_heatmap_keras(img_array, model, last_conv_layer_name, pred_inde
     dummy_input = np.random.rand(1, 205, 300, 1).astype("float32")
     _ = model.predict(dummy_input)
     model(dummy_input)
+
+
     model.layers[-1].activation = None
-    # First, create a model that maps the input image to the activations
-    # of the last convolutional layer as well as the output predictions
 
-    #dummy_input = np.random.rand(1, 205, 300, 1).astype("float32")
-    #_ = model.predict(dummy_input)
-
-    ##print(model.get_layer(last_conv_layer_name).output)
-    #print([layer.name for layer in model.layers])
-    #print(model.inputs)
-    #print(model.outputs)
-    #print(model.get_layer('conv2d_3').output)
     grad_model = keras.models.Model(
-        model.inputs, [model.get_layer('conv2d_3').output, model.output]
+        model.inputs, [model.get_layer(last_conv_layer_name).output, model.output]
     )
 
 
@@ -55,10 +47,7 @@ def make_gradcam_heatmap_keras(img_array, model, last_conv_layer_name, pred_inde
 
     # Convert the heatmap to a PIL Image
     heatmap = Image.fromarray((heatmap * 255).astype(np.uint8))  # Scale the values to [0, 255]
-    # Resize the heatmap to match the original image dimensions if needed (optional)
     heatmap = heatmap.resize((800,600))
-    # Convert the PIL Image to a Tkinter-compatible PhotoImage
-    #heatmap_tk = ImageTk.PhotoImage(heatmap)
-
+    heatmap.save("Grad-CAM_"+last_conv_layer_name+".png")
     return heatmap
 

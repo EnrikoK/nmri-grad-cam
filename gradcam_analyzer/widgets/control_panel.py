@@ -2,9 +2,9 @@ import tkinter as tk
 from functools import partial
 from tkinter import ttk, PhotoImage
 from PIL import Image, ImageTk
-from ..service import AnalysisService
-from gradcam_analyzer.widgets import ImageLoader
 
+from ..service import AnalysisService
+from ..widgets import  ImageLoader
 
 class ControlPanel(tk.Frame):
 
@@ -28,7 +28,8 @@ class ControlPanel(tk.Frame):
             self.model_selector_button.get(),
             self.cam_selector_button.get(),
             self.image_loader.image_data,
-            ["Fatty acids", "Indol", "Steroiods"]
+            ["Fatty acids", "Indol", "Steroiods"],
+            self.conv_layer_selector_button.get()
         )
         idx = 0
         for key, (score,cam_image) in result.items():
@@ -40,47 +41,48 @@ class ControlPanel(tk.Frame):
 
     def __init__(self, parent, image_loader: ImageLoader):
 
-        options = [
-            "Grad-CAM",
-        ]
         super().__init__(parent,width=500, height=200, borderwidth=2)
-
         self.analysis_result = None
         # Dependencies
         self.image_loader = image_loader
-        self.analysis_service = AnalysisService("/home/rix/TartuYlikool/lõputöö/substructuresnmr/models")
-
+        self.analysis_service = AnalysisService("../models")
 
         #Widgets
+        # Selecting the model
         self.model_selector_button = ttk.Combobox(self, values=self.analysis_service.get_models())
         self.model_selector_button.set(self.analysis_service.get_models()[0])
-
+        # Selecting the CAM options
+        options = self.analysis_service.get_cam_options()
         self.cam_selector_button = ttk.Combobox(self, values=options)
         self.cam_selector_button.set(options[0])
+        # Selecting the analysis layer
+        self.conv_layer_selector_button = ttk.Combobox(self, values=["conv2d","conv2d_1", "conv2d_2", "conv2d_3"])
+        self.conv_layer_selector_button.set("conv2d_3")
 
+        # Area for populating the model predictions
         self.model_analysis_area = tk.LabelFrame(self, text="Model predictions")
 
-
-        self.layers = {
+        # Analysis respect to target class selector
+        self.analysis_layers = ttk.Frame(self)
+        self.analysis_layers.grid(row=0, column=0)
+        self.class_layers = {
             "Original Image": tk.BooleanVar(value=True),
             "Fatty acids": tk.BooleanVar(value=False),
             "Indol": tk.BooleanVar(value=False),
             "Steroiods": tk.BooleanVar(value=False)
         }
-        self.analysis_layers = ttk.Frame(self)
-        self.analysis_layers.grid(row=0, column=0)
-        self.selected_layer = tk.StringVar(value="Original Image")  # StringVar to hold the selected layer
+
+        self.selected_layer = tk.StringVar(value="Original Image")  # StringVar to hold the selected layer, default image
         # Create a radio button for each layer
-        for i, layer in enumerate(self.layers):
+        for i, layer in enumerate(self.class_layers):
             rad = ttk.Radiobutton(
                 self.analysis_layers,
                 text=layer,
-                value=self.layers[layer],  # Value of the radio button
+                value=self.class_layers[layer],  # Value of the radio button
                 variable=self.selected_layer,  # This variable will hold the selected value
                 command=partial(self.show_layer, layer)  # Call show_layer when selected
             )
             rad.grid(row=0, column=i, padx=10, pady=5)
-
 
         self.refresh_button = tk.Button(self, text="Analyze", command=self.analyze_image)
 
@@ -89,12 +91,14 @@ class ControlPanel(tk.Frame):
         self.analysis_layers.pack(pady=5)
         self.model_selector_button.pack(side=tk.LEFT, padx=10, pady=10)
         self.cam_selector_button.pack(side=tk.LEFT, padx=10, pady=10)
+        self.conv_layer_selector_button.pack(side=tk.LEFT, padx=10, pady=10)
         self.model_analysis_area.pack(side=tk.LEFT, padx=10, pady=10, fill="both", expand=True)
         self.refresh_button.pack(side=tk.RIGHT, padx=10, pady=10)
 
 
 
     def create_masked_layer(self, mask, alpha=0.5):
+        """ Generate a red mask based on the CAM image returned and merge it with the original image"""
         base = self.image_loader.display_image.convert("RGBA")
 
         red_mask = Image.merge("RGBA", (
