@@ -33,7 +33,7 @@ class ControlPanel(tk.Frame):
         )
         idx = 0
         for key, (score,cam_image) in result.items():
-            label = ttk.Label(self.model_analysis_area, text=f"{key}: {round(score)}", font=("Arial", 12))
+            label = ttk.Label(self.model_analysis_area, text=f"{key}: {round(score,5)}", font=("Arial", 12))
             label.grid(row=0, column=idx, padx=10, pady=5)
             idx+=1
         self.analysis_result = result
@@ -99,8 +99,8 @@ class ControlPanel(tk.Frame):
 
     def create_masked_layer(self, mask, alpha=0.5):
         """ Generate a red mask based on the CAM image returned and merge it with the original image"""
-        base = self.image_loader.display_image.convert("RGBA")
-
+        base = self.image_loader.image_data.convert("RGBA")
+        base=base.resize((800,600))
         red_mask = Image.merge("RGBA", (
             mask,  # Red channel = grayscale mask
             Image.new("L", mask.size, 0),  # Green channel = 0
@@ -115,6 +115,6 @@ class ControlPanel(tk.Frame):
             self.image_loader.reset_image()
         else:
             image= self.analysis_result[layer][1]
-            image = ImageTk.PhotoImage(self.create_masked_layer(image))
-            self.image_loader.update_image(image)
+            #image = ImageTk.PhotoImage(self.create_masked_layer(image))
+            self.image_loader.update_image(self.create_masked_layer(image))
 
