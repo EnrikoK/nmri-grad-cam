@@ -11,12 +11,15 @@ class ImageLoader(tk.Frame):
         self.image_label.pack(expand=True)
         self.pack()
 
-        self.load_button = tk.Button(self, text="Load Image", command=self.load_image)
-        self.load_button.pack(pady=10)
+        # Create a frame to hold the buttons side by side
+        button_frame = tk.Frame(self)
+        button_frame.pack(pady=10)
 
-        self.save_button = tk.Button(self, text="Save Image", command=self.save_image)
-        self.save_button.pack(pady=10)
+        self.load_button = tk.Button(button_frame, text="Load Image", command=self.load_image)
+        self.load_button.pack(side="left", padx=5)
 
+        self.save_button = tk.Button(button_frame, text="Save Image", command=self.save_image)
+        self.save_button.pack(side="left", padx=5)
 
     def load_image(self):
         file_path = filedialog.askopenfilename()

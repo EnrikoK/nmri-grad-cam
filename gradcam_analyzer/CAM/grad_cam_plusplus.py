@@ -1,13 +1,16 @@
+from unicodedata import category
+
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from PIL import Image
 
 
-def make_gradcam_plus_plus_heatmap_keras(img_array, model, last_conv_layer_name, pred_index=None):
+def make_gradcam_plus_plus_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
     """
     Compute Grad-CAM++ heatmap for a given image and model.
     https://github.com/samson6460/tf_keras_gradcamplusplus/blob/master/gradcam.py
+    https://blog.aiensured.com/gradcam-plus-plus/
 
     Parameters:
       img_array (numpy.ndarray): Preprocessed image array.
@@ -40,8 +43,10 @@ def make_gradcam_plus_plus_heatmap_keras(img_array, model, last_conv_layer_name,
         with tf.GradientTape() as gtape2:
             with tf.GradientTape() as gtape3:
                 conv_output, predictions = grad_model([img_array])
-
-                category_id = np.argmax(predictions[0])
+                if pred_index is None:
+                    category_id = np.argmax(predictions[0])
+                else:
+                    category_id = pred_index
                 output = predictions[:, category_id]
                 conv_first_grad = gtape3.gradient(output, conv_output)
             conv_second_grad = gtape2.gradient(conv_first_grad, conv_output)

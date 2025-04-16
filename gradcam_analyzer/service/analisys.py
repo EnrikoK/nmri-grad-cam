@@ -2,14 +2,16 @@ import os
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
-from ..CAM.guided import make_gradcam_heatmap_keras
+#from ..CAM.guided import make_gradcam_heatmap_keras
 from ..CAM.py_imgsearch_cam import compute_heatmap
+from ..CAM.grad_cam import make_gradcam_heatmap
+from ..CAM.grad_cam_plusplus import make_gradcam_plus_plus_heatmap
 
 class AnalysisService():
 
     cam_options = {
-        "Grad-CAM": make_gradcam_heatmap_keras,
-        "Guided Grad-CAM": compute_heatmap
+        "Grad-CAM": make_gradcam_heatmap,
+        "Grad-CAM++": make_gradcam_plus_plus_heatmap
     }
 
     def __init__(self, models_folder: str):
@@ -67,12 +69,11 @@ class AnalysisService():
         for index, class_name in enumerate(prediction_classes):
 
             score = predictions[0, index]
-            #for layer in ["conv2d","conv2d_1", "conv2d_2", "conv2d_3"]:
             model = self.load_model_from_location(model_name)
             cam_image = AnalysisService.cam_options[selected_cam](
                 img_array=image,
                 model=model,
-                last_conv_layer_name=conv_layer,#model.layers[0].name
+                last_conv_layer_name=conv_layer,
                 pred_index=index
             )
 

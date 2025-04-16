@@ -5,7 +5,7 @@ import tensorflow as tf
 import keras
 
 
-def make_gradcam_heatmap_keras(img_array, model, last_conv_layer_name, pred_index=None):
+def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
     """
     Grad-CAM implementation based on the Keras documentation.
     https://keras.io/examples/vision/grad_cam/
