@@ -1,6 +1,6 @@
 
 import numpy as np
-from PIL import Image, ImageTk
+from PIL import Image
 import tensorflow as tf
 import keras
 
@@ -48,6 +48,5 @@ def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None
     # Convert the heatmap to a PIL Image
     heatmap = Image.fromarray((heatmap * 255).astype(np.uint8))  # Scale the values to [0, 255]
     heatmap = heatmap.resize((800,600))
-    heatmap.save("Grad-CAM_"+last_conv_layer_name+".png")
     return heatmap
 

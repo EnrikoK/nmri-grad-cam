@@ -2,8 +2,6 @@ import os
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
-#from ..CAM.guided import make_gradcam_heatmap_keras
-from ..CAM.py_imgsearch_cam import compute_heatmap
 from ..CAM.grad_cam import make_gradcam_heatmap
 from ..CAM.grad_cam_plusplus import make_gradcam_plus_plus_heatmap
 

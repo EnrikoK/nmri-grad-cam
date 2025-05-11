@@ -20,7 +20,7 @@ class ControlPanel(tk.Frame):
         self.analysis_service = AnalysisService("../models")
 
         #Widgets
-        # === Frame for model/CAM/layer selectors ===
+        # Frame for model/CAM/layer selectors
         self.selection_frame = ttk.LabelFrame(self, text="Analysis Settings")
         self.selection_frame.pack(padx=10, pady=10, fill="x")
 
